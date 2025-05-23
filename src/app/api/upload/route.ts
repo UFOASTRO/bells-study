@@ -35,7 +35,7 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ content: text });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: { message: 'Failed to process file' } },
       { status: 500 }

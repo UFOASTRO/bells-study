@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
 export async function POST(req: NextRequest) {
-  const { prompt, type } = await req.json();
+  const { prompt } = await req.json();
   const API_KEY = process.env.GEMINI_API_KEY; // Use a secret, not NEXT_PUBLIC
 
   if (!API_KEY) {
@@ -19,7 +19,7 @@ export async function POST(req: NextRequest) {
     });
     const result = await aiResponse.response;
     return NextResponse.json({ text: result.text() });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: "Gemini API error" }, { status: 500 });
   }
 }
