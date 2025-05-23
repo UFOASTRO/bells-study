@@ -138,7 +138,7 @@ Each question object must have this exact structure and key names (case-sensitiv
         const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
         const jsonString = jsonMatch ? jsonMatch[0] : cleaned;
         parsedQuiz = JSON.parse(jsonString);
-      } catch (_) { // changed from (parseError)
+      } catch {
         console.error("Raw AI response:", aiText);
         throw new Error("Failed to parse AI response as JSON");
       }
