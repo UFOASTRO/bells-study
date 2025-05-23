@@ -347,7 +347,7 @@ function QuizStepper({
           <div className="w-full">
             <div className="flex items-center justify-between mb-8">
               <span className="text-purple-400 font-semibold text-2xl">
-                Question {current + 1} <span className="text-gray-400">/ {quiz.length}</span>
+                Question {current + 1} <span className="text-gray-400 ml-2">/ {quiz.length}</span>
               </span>
               <div className="flex-1 max-w-lg flex space-x-1 overflow-hidden rounded-full bg-gray-800 h-3">
                 {quiz.map((_, idx) => (
@@ -371,7 +371,7 @@ function QuizStepper({
               </div>
             </div>
             <div className="mb-10">
-              <h3 className="text-3xl font-bold text-white mb-6">{quiz[current].question}</h3>
+              <h3 className="text-2xl font-bold text-white mb-6">{quiz[current].question}</h3>
               <div className="grid gap-6">
                 {quiz[current].options.map((opt, idx) => (
                   <button
