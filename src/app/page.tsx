@@ -5,11 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { UploadCloud } from "lucide-react";
 import axios from "axios";
-import { GoogleGenerativeAI } from "@google/generative-ai";
-
-const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "YOUR_API_KEY";
-const genAI = new GoogleGenerativeAI(API_KEY);
-const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Changed from gemini-pro
 
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
@@ -53,10 +48,6 @@ export default function Home() {
   const handleUpload = async () => {
     setErrorMessage("");
 
-    if (!API_KEY || API_KEY === "YOUR_GEMINI_API_KEY") {
-      setErrorMessage("Please enter your Gemini API key in the code.");
-      return;
-    }
     if (!file) {
       setErrorMessage("Please select or drop a file to upload.");
       return;
@@ -80,7 +71,7 @@ export default function Home() {
       const formData = new FormData();
       formData.append("file", file);
       const response = await axios.post("/api/upload", formData);
-      
+
       if (!response.data || typeof response.data.content !== "string") {
         throw new Error("Uploaded file content was not returned");
       }
@@ -111,20 +102,14 @@ Each question object must have this exact structure and key names (case-sensitiv
       Content to analyze:
       ${fileContent}`;
 
-      const aiResponse = await model.generateContent({
-        contents: [{
-          role: "user",
-          parts: [{ text: promptText }]
-        }],
-        generationConfig: {
-          temperature: 0.7,
-          maxOutputTokens: 4096, // Try 2048, 3072, or 4096
-        }
+      const geminiResponse = await fetch("/api/gemini", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: promptText, type: "quiz" }),
       });
+      const data = await geminiResponse.json();
+      const aiText = data.text;
 
-      const result = await aiResponse.response;
-      const aiText = result.text();
-      
       let parsedQuiz;
       try {
           // Remove Markdown code block if present
@@ -187,18 +172,13 @@ Selected: ${selected}
 Correct: ${q.correctOption}
 Provide a clear, concise explanation for the correct answer. Limit your explanation to 100 words or fewer. Including No special characters like "**" or "[]". etc. and avoid any additional text or formatting.`;
       try {
-        const aiResponse = await model.generateContent({
-          contents: [{
-            role: "user",
-            parts: [{ text: explanationPrompt }]
-          }],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 4096,
-          }
+        const response = await fetch("/api/gemini", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ prompt: explanationPrompt, type: "explanation" }),
         });
-        const result = await aiResponse.response;
-        const text = result.text();
+        const data = await response.json();
+        const text = data.text;
         explanations.push(
           typeof text === "string" ? text.trim() : "Explanation unavailable."
         );
@@ -232,14 +212,14 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
 
   //UI
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-2 py-6 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gray-950 text-white px-4 py-10 flex flex-col items-center justify-center">
       {/* Show heading/subheading only before quiz starts */}
       {quiz.length === 0 && quizResults == null && (
-        <div className="text-center space-y-2 mb-6">
-          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-lg">
-            Bells <span className="text-purple-500 text-3xl">Study</span>
+        <div className="text-center space-y-4 mb-12">
+          <h1 className="text-5xl font-extrabold tracking-tight drop-shadow-lg">
+            Bells <span className="text-purple-500 text-5xl">Study</span>
           </h1>
-          <p className="text-gray-300 text-lg max-w-xl mx-auto">
+          <p className="text-gray-300 text-2xl max-w-2xl mx-auto">
             Upload your notes and instantly generate a quiz powered by <span className="font-semibold text-purple-400">Gemini AI</span>.
           </p>
         </div>
@@ -248,13 +228,13 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
       {/* Quiz Stepper with PDF name as heading */}
       {Array.isArray(quiz) && quiz.length > 0 && quizResults == null && (
         <div className="flex flex-col items-center w-full">
-          <div className="flex items-center justify-between w-full max-w-md mb-2">
-            <h2 className="text-xl font-bold text-purple-500 drop-shadow">
+          <div className="flex items-center justify-between w-full max-w-xl mb-4">
+            <h2 className="text-3xl font-bold text-purple-500 drop-shadow">
               {fileName ? `${fileName} Quiz` : "Quiz"}
             </h2>
             <Button
               onClick={handleRestart}
-              className="ml-auto px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold transition"
+              className="ml-auto px-5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-lg font-semibold transition"
               type="button"
             >
               Exit Quiz
@@ -269,48 +249,48 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
 
       {/* Upload card */}
       {quiz.length === 0 && quizResults == null && (
-        <Card className="w-full max-w-md bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-2xl shadow-2xl">
-          <CardContent className="p-4 space-y-4">
+        <Card className="w-full max-w-xl bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-2xl">
+          <CardContent className="p-10 space-y-8">
             <div
-              className="flex flex-col items-center justify-center w-full p-6 border-4 border-dashed border-purple-700/40 rounded-xl hover:border-purple-500/80 transition cursor-pointer text-center text-gray-300 bg-gray-950/60"
+              className="flex flex-col items-center justify-center w-full p-10 border-4 border-dashed border-purple-700/40 rounded-2xl hover:border-purple-500/80 transition cursor-pointer text-center text-gray-300 bg-gray-950/60"
               onClick={() => fileInputRef.current?.click()}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              style={{ minHeight: 120 }}>
-              <UploadCloud className="mb-2 h-8 w-8 text-purple-400 drop-shadow" />
-              <p className="text-base font-medium">
-              {file ? file.name : "Click or drag your file here"}
+              style={{ minHeight: 180 }}>
+              <UploadCloud className="mb-4 h-14 w-14 text-purple-400 drop-shadow" />
+              <p className="text-xl font-medium">
+                {file ? file.name : "Click or drag your file here"}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
-              Supported: <span className="font-semibold">PDF, DOCX, PPT, PPTX</span>
+              <p className="text-lg text-gray-500 mt-2">
+                Supported: <span className="font-semibold">PDF, DOCX, PPT, PPTX</span>
               </p>
               <input
-              ref={fileInputRef}
-              type="file"
-              accept=".pdf,.docx,.ppt,.pptx"
-              className="hidden"
-              onChange={handleFileChange}
+                ref={fileInputRef}
+                type="file"
+                accept=".pdf,.docx,.ppt,.pptx"
+                className="hidden"
+                onChange={handleFileChange}
               />
             </div>
             <Button
               onClick={handleUpload}
               disabled={uploading || !file}
-              className="w-full mt-2 py-3 text-base font-semibold rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition"
+              className="w-full mt-4 py-5 text-xl font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition"
             >
               {uploading ? (
-              <span>
-                <span className="animate-spin inline-block mr-2 align-middle">&#9696;</span>
-                Generating Quiz...
-              </span>
+                <span>
+                  <span className="animate-spin inline-block mr-2 align-middle">&#9696;</span>
+                  Generating Quiz...
+                </span>
               ) : (
-              "Generate Quiz"
+                "Generate Quiz"
               )}
             </Button>
             {errorMessage && (
-              <p className="text-base text-red-400 mt-2">{errorMessage}</p>
+              <p className="text-lg text-red-400 mt-4">{errorMessage}</p>
             )}
-            </CardContent>
-          </Card>
+          </CardContent>
+        </Card>
       )}
 
       {/* Quiz results */}
@@ -363,13 +343,13 @@ function QuizStepper({
   return (
     <div className="mt-10 w-full max-w-xl flex flex-col items-center">
       <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-xl">
-        <CardContent className="p-8 flex flex-col items-center">
+        <CardContent className="p-10 flex flex-col items-center">
           <div className="w-full">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-purple-400 font-semibold text-lg">
+            <div className="flex items-center justify-between mb-8">
+              <span className="text-purple-400 font-semibold text-2xl">
                 Question {current + 1} <span className="text-gray-400">/ {quiz.length}</span>
               </span>
-              <div className="flex-1 max-w-xs flex space-x-0.5 overflow-hidden rounded-full bg-gray-800 h-2">
+              <div className="flex-1 max-w-lg flex space-x-1 overflow-hidden rounded-full bg-gray-800 h-3">
                 {quiz.map((_, idx) => (
                   <span
                     key={idx}
@@ -390,9 +370,9 @@ function QuizStepper({
                 ))}
               </div>
             </div>
-            <div className="mb-8">
-              <h3 className="text-2xl font-bold text-white mb-4">{quiz[current].question}</h3>
-              <div className="grid gap-4">
+            <div className="mb-10">
+              <h3 className="text-3xl font-bold text-white mb-6">{quiz[current].question}</h3>
+              <div className="grid gap-6">
                 {quiz[current].options.map((opt, idx) => (
                   <button
                     key={idx}
@@ -430,7 +410,7 @@ function QuizStepper({
                 ))}
               </div>
             </div>
-            <div className="flex justify-between items-center w-full mt-4">
+            <div className="flex justify-between items-center w-full mt-6">
               <Button
                 type="button"
                 className="rounded-lg px-6 py-2 text-base font-semibold bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
@@ -519,10 +499,10 @@ function ReviewStepper({
   return (
     <div className="mt-10 w-full max-w-xl flex flex-col items-center">
       <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-xl">
-        <CardContent className="p-8 flex flex-col items-center">
+        <CardContent className="p-10 flex flex-col items-center">
           <div className="w-full">
-            <div className="flex items-center justify-between mb-6">
-              <span className="text-purple-400 font-semibold text-lg">
+            <div className="flex items-center justify-between mb-8">
+              <span className="text-purple-400 font-semibold text-2xl">
                 Review {current + 1} <span className="text-gray-400">/ {quiz.length}</span>
               </span>
               <span className="text-lg font-bold text-purple-400">

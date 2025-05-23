@@ -5,7 +5,7 @@ import { DocxLoader } from '@langchain/community/document_loaders/fs/docx';
 export async function POST(req: NextRequest) {
   try {
     const formData = await req.formData();
-    const file = formData.get('file') as File;
+    const file = formData.get('file') as Blob;
 
     if (!file) {
       return NextResponse.json(
@@ -14,8 +14,8 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // Convert file to buffer
-    const buffer = await file.arrayBuffer();
+    // Convert file to arrayBuffer
+    const buffer = Buffer.from(await file.arrayBuffer());
 
     // Handle different file types
     let text = '';
@@ -35,11 +35,9 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ content: text });
-  } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error('Error processing file:', message);
+  } catch (error) {
     return NextResponse.json(
-      { error: { message: message || 'Failed to process file' } },
+      { error: { message: 'Failed to process file' } },
       { status: 500 }
     );
   }
