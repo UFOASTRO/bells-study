@@ -232,14 +232,14 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
 
   //UI
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-4 py-10 flex flex-col items-center justify-center">
+    <div className="min-h-screen bg-gray-950 text-white px-2 py-6 flex flex-col items-center justify-center">
       {/* Show heading/subheading only before quiz starts */}
       {quiz.length === 0 && quizResults == null && (
-        <div className="text-center space-y-4 mb-12">
-          <h1 className="text-6xl font-extrabold tracking-tight drop-shadow-lg">
-            Bells <span className="text-purple-500 text-6xl">Study</span>
+        <div className="text-center space-y-2 mb-6">
+          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-lg">
+            Bells <span className="text-purple-500 text-3xl">Study</span>
           </h1>
-          <p className="text-gray-300 text-2xl max-w-2xl mx-auto">
+          <p className="text-gray-300 text-lg max-w-xl mx-auto">
             Upload your notes and instantly generate a quiz powered by <span className="font-semibold text-purple-400">Gemini AI</span>.
           </p>
         </div>
@@ -248,13 +248,13 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
       {/* Quiz Stepper with PDF name as heading */}
       {Array.isArray(quiz) && quiz.length > 0 && quizResults == null && (
         <div className="flex flex-col items-center w-full">
-          <div className="flex items-center justify-between w-full max-w-xl mb-4">
-            <h2 className="text-3xl font-bold text-purple-500 drop-shadow">
+          <div className="flex items-center justify-between w-full max-w-md mb-2">
+            <h2 className="text-xl font-bold text-purple-500 drop-shadow">
               {fileName ? `${fileName} Quiz` : "Quiz"}
             </h2>
             <Button
               onClick={handleRestart}
-              className="ml-auto px-4 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-base font-semibold transition"
+              className="ml-auto px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 text-sm font-semibold transition"
               type="button"
             >
               Exit Quiz
@@ -269,19 +269,19 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
 
       {/* Upload card */}
       {quiz.length === 0 && quizResults == null && (
-        <Card className="w-full max-w-2xl bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-2xl">
-          <CardContent className="p-10 space-y-8">
+        <Card className="w-full max-w-md bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-2xl shadow-2xl">
+          <CardContent className="p-4 space-y-4">
             <div
-              className="flex flex-col items-center justify-center w-full p-10 border-4 border-dashed border-purple-700/40 rounded-2xl hover:border-purple-500/80 transition cursor-pointer text-center text-gray-300 bg-gray-950/60"
+              className="flex flex-col items-center justify-center w-full p-6 border-4 border-dashed border-purple-700/40 rounded-xl hover:border-purple-500/80 transition cursor-pointer text-center text-gray-300 bg-gray-950/60"
               onClick={() => fileInputRef.current?.click()}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              style={{ minHeight: 200 }}>
-              <UploadCloud className="mb-4 h-14 w-14 text-purple-400 drop-shadow" />
-              <p className="text-lg font-medium">
+              style={{ minHeight: 120 }}>
+              <UploadCloud className="mb-2 h-8 w-8 text-purple-400 drop-shadow" />
+              <p className="text-base font-medium">
               {file ? file.name : "Click or drag your file here"}
               </p>
-              <p className="text-base text-gray-500 mt-2">
+              <p className="text-sm text-gray-500 mt-1">
               Supported: <span className="font-semibold">PDF, DOCX, PPT, PPTX</span>
               </p>
               <input
@@ -295,7 +295,7 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
             <Button
               onClick={handleUpload}
               disabled={uploading || !file}
-              className="w-full mt-4 py-5 text-xl font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition"
+              className="w-full mt-2 py-3 text-base font-semibold rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition"
             >
               {uploading ? (
               <span>
@@ -307,7 +307,7 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
               )}
             </Button>
             {errorMessage && (
-              <p className="text-lg text-red-400 mt-4">{errorMessage}</p>
+              <p className="text-base text-red-400 mt-2">{errorMessage}</p>
             )}
             </CardContent>
           </Card>
