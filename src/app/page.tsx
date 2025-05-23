@@ -212,14 +212,14 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
 
   //UI
   return (
-    <div className="min-h-screen bg-gray-950 text-white px-2 py-6 flex flex-col items-center justify-center text-base">
+    <div className="min-h-screen bg-gray-950 text-white px-4 py-10 flex flex-col items-center justify-center text-lg">
       {/* Show heading/subheading only before quiz starts */}
       {quiz.length === 0 && quizResults == null && (
-        <div className="text-center space-y-2 mb-8">
-          <h1 className="text-3xl font-extrabold tracking-tight drop-shadow-lg">
-            Bells <span className="text-purple-500 text-3xl">Study</span>
+        <div className="text-center space-y-3 mb-12">
+          <h1 className="text-4xl font-extrabold tracking-tight drop-shadow-lg">
+            Bells <span className="text-purple-500 text-4xl">Study</span>
           </h1>
-          <p className="text-gray-300 text-lg max-w-xl mx-auto">
+          <p className="text-gray-200 text-lg  max-w-2xl mx-auto">
             Upload your notes and instantly generate a quiz powered by <span className="font-semibold text-purple-400">Gemini AI</span>.
           </p>
         </div>
@@ -228,13 +228,13 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
       {/* Quiz Stepper with PDF name as heading */}
       {Array.isArray(quiz) && quiz.length > 0 && quizResults == null && (
         <div className="flex flex-col items-center w-full">
-          <div className="flex items-center justify-between w-full max-w-md mb-2">
-            <h2 className="text-xl font-bold text-purple-500 drop-shadow">
+          <div className="flex items-center justify-between w-full max-w-2xl mb-4">
+            <h2 className="text-2xl font-bold text-purple-500 drop-shadow">
               {fileName ? `${fileName} Quiz` : "Quiz"}
             </h2>
             <Button
               onClick={handleRestart}
-              className="ml-auto px-3 py-1 rounded bg-gray-800 hover:bg-gray-700 text-gray-200 text-base font-semibold transition"
+              className="ml-auto px-5 py-2 rounded-lg bg-gray-800 hover:bg-gray-700 text-gray-200 text-lg font-semibold transition"
               type="button"
             >
               Exit Quiz
@@ -249,19 +249,19 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
 
       {/* Upload card */}
       {quiz.length === 0 && quizResults == null && (
-        <Card className="w-full max-w-md bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-2xl shadow-2xl">
-          <CardContent className="p-6 space-y-4">
+        <Card className="w-full max-w-2xl bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-2xl">
+          <CardContent className="p-10 space-y-6">
             <div
-              className="flex flex-col items-center justify-center w-full p-6 border-4 border-dashed border-purple-700/40 rounded-xl hover:border-purple-500/80 transition cursor-pointer text-center text-gray-300 bg-gray-950/60"
+              className="flex flex-col items-center justify-center w-full p-10 border-4 border-dashed border-purple-700/40 rounded-2xl hover:border-purple-500/80 transition cursor-pointer text-center text-gray-300 bg-gray-950/60"
               onClick={() => fileInputRef.current?.click()}
               onDrop={handleDrop}
               onDragOver={handleDragOver}
-              style={{ minHeight: 120 }}>
-              <UploadCloud className="mb-2 h-8 w-8 text-purple-400 drop-shadow" />
-              <p className="text-base font-medium">
+              style={{ minHeight: 160 }}>
+              <UploadCloud className="mb-3 h-12 w-12 text-purple-400 drop-shadow" />
+              <p className="text-lg font-medium">
                 {file ? file.name : "Click or drag your file here"}
               </p>
-              <p className="text-sm text-gray-500 mt-1">
+              <p className="text-base text-gray-500 mt-2">
                 Supported: <span className="font-semibold">PDF, DOCX, PPT, PPTX</span>
               </p>
               <input
@@ -275,7 +275,7 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
             <Button
               onClick={handleUpload}
               disabled={uploading || !file}
-              className="w-full mt-2 py-3 text-base font-semibold rounded-lg bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition"
+              className="w-full mt-3 py-4 text-lg font-semibold rounded-xl bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 transition"
             >
               {uploading ? (
                 <span>
@@ -287,7 +287,7 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
               )}
             </Button>
             {errorMessage && (
-              <p className="text-base text-red-400 mt-2">{errorMessage}</p>
+              <p className="text-lg text-red-400 mt-3">{errorMessage}</p>
             )}
           </CardContent>
         </Card>
@@ -341,12 +341,12 @@ function QuizStepper({
   };
 
   return (
-    <div className="mt-10 w-full max-w-xl flex flex-col items-center">
-      <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-xl">
-        <CardContent className="p-10 flex flex-col items-center">
+    <div className="mt-10 w-full max-w-2xl flex flex-col items-center">
+      <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-4xl shadow-xl">
+        <CardContent className="p-12 flex flex-col items-center">
           <div className="w-full">
             <div className="flex items-center justify-between mb-8">
-              <span className="text-purple-400 font-semibold text-2xl">
+              <span className="text-purple-400 font-semibold text-3xl">
                 Question {current + 1} <span className="text-gray-400 ml-2">/ {quiz.length}</span>
               </span>
               <div className="flex-1 max-w-lg flex space-x-1 overflow-hidden rounded-full bg-gray-800 h-3">
@@ -371,14 +371,14 @@ function QuizStepper({
               </div>
             </div>
             <div className="mb-10">
-              <h3 className="text-2xl font-bold text-white mb-6">{quiz[current].question}</h3>
+              <h3 className="text-3xl font-bold text-white mb-6">{quiz[current].question}</h3>
               <div className="grid gap-6">
                 {quiz[current].options.map((opt, idx) => (
                   <button
                     key={idx}
                     type="button"
                     onClick={() => handleOptionSelect(opt)}
-                    className={`w-full flex items-center px-5 py-4 rounded-xl border-2 transition-all duration-150 text-lg font-medium
+                    className={`w-full flex items-center px-6 py-4 rounded-xl border-2 transition-all duration-150 text-xl font-medium
                       ${
                         answers[current] === opt
                           ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white shadow-lg scale-105"
@@ -497,12 +497,12 @@ function ReviewStepper({
   const q = quiz[current];
 
   return (
-    <div className="mt-10 w-full max-w-xl flex flex-col items-center">
-      <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-xl">
-        <CardContent className="p-10 flex flex-col items-center">
+    <div className="mt-10 w-full max-w-2xl flex flex-col items-center">
+      <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-4xl shadow-xl">
+        <CardContent className="p-12 flex flex-col items-center">
           <div className="w-full">
             <div className="flex items-center justify-between mb-8">
-              <span className="text-purple-400 font-semibold text-2xl">
+              <span className="text-purple-400 font-semibold text-3xl">
                 Review {current + 1} <span className="text-gray-400">/ {quiz.length}</span>
               </span>
               <span className="text-lg font-bold text-purple-400">

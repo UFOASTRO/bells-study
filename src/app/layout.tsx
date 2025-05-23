@@ -40,7 +40,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {children}
-        <footer className="w-full text-center py-6 mt-12 text-gray-500 text-sm">
+        <footer className="w-full text-center py-6 text-gray-500 text-sm">
           &copy; 2025 <span className="font-semibold text-purple-400">Oluwanifemi</span>. All rights reserved.
         </footer>
       </body>
