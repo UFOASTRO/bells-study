@@ -35,10 +35,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json({ content: text });
-  } catch (error: any) {
-    console.error('Error processing file:', error);
+  } catch (error: unknown) {
+    const message = error instanceof Error ? error.message : String(error);
+    console.error('Error processing file:', message);
     return NextResponse.json(
-      { error: { message: error.message || 'Failed to process file' } },
+      { error: { message: message || 'Failed to process file' } },
       { status: 500 }
     );
   }

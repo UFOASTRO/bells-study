@@ -11,23 +11,6 @@ const API_KEY = process.env.NEXT_PUBLIC_GEMINI_API_KEY || "YOUR_API_KEY";
 const genAI = new GoogleGenerativeAI(API_KEY);
 const model = genAI.getGenerativeModel({ model: "gemini-2.0-flash" }); // Changed from gemini-pro
 
-// Fix the schema structure
-const schema = {
-  type: "array", // Changed from "object"
-  items: {
-    type: "object",
-    properties: {
-      question: { type: "string" },
-      options: {
-        type: "array",
-        items: { type: "string" }
-      },
-      correctOption: { type: "string" }
-    },
-    required: ["question", "options", "correctOption"]
-  }
-};
-
 export default function Home() {
   const [file, setFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
@@ -44,7 +27,6 @@ export default function Home() {
       }[]
   >(null);
   const [errorMessage, setErrorMessage] = useState("");
-  const [loadingExplanations, setLoadingExplanations] = useState(false);
   const [score, setScore] = useState(0);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -156,7 +138,7 @@ Each question object must have this exact structure and key names (case-sensitiv
         const jsonMatch = cleaned.match(/\[[\s\S]*\]/);
         const jsonString = jsonMatch ? jsonMatch[0] : cleaned;
         parsedQuiz = JSON.parse(jsonString);
-      } catch (parseError) {
+      } catch (_) { // changed from (parseError)
         console.error("Raw AI response:", aiText);
         throw new Error("Failed to parse AI response as JSON");
       }
@@ -179,9 +161,10 @@ Each question object must have this exact structure and key names (case-sensitiv
       }
 
       setQuiz(parsedQuiz);
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : String(error);
       console.error("Error:", error);
-      setErrorMessage(error.message || "An unexpected error occurred");
+      setErrorMessage(message || "An unexpected error occurred");
     } finally {
       setUploading(false);
     }
@@ -194,7 +177,6 @@ Each question object must have this exact structure and key names (case-sensitiv
       if (answers[idx] === q.correctOption) correctCount++;
     });
     setScore(correctCount);
-    setLoadingExplanations(true);
     const explanations: string[] = [];
     for (let idx = 0; idx < quiz.length; idx++) {
       const q = quiz[idx];
@@ -232,7 +214,6 @@ Provide a clear, concise explanation for the correct answer. Limit your explanat
       explanation: explanations[idx] || "Explanation unavailable.",
     }));
     setQuizResults(resultsArray);
-    setLoadingExplanations(false);
   };
 
   const handleRestart = () => {
@@ -355,149 +336,144 @@ function QuizStepper({
 }) {
   const [current, setCurrent] = useState(0);
   const [answers, setAnswers] = useState<string[]>(Array(quiz.length).fill(""));
-  const [touched, setTouched] = useState(false);
   const [submitting, setSubmitting] = useState(false);
 
   const handleOptionSelect = (value: string) => {
-  const updated = [...answers];
-  updated[current] = value;
-  setAnswers(updated);
-  setTouched(true);
+    const updated = [...answers];
+    updated[current] = value;
+    setAnswers(updated);
   };
 
   const handleNext = () => {
-  if (answers[current]) {
-    setCurrent((c) => c + 1);
-    setTouched(false);
-  }
+    if (answers[current]) {
+      setCurrent((c) => c + 1);
+    }
   };
 
   const handlePrev = () => {
-  setCurrent((c) => Math.max(0, c - 1));
-  setTouched(false);
+    setCurrent((c) => Math.max(0, c - 1));
   };
 
   const handleFinalSubmit = async () => {
-  setSubmitting(true);
-  await onSubmit(answers);
-  setSubmitting(false);
+    setSubmitting(true);
+    await onSubmit(answers);
+    setSubmitting(false);
   };
 
   return (
-  <div className="mt-10 w-full max-w-xl flex flex-col items-center">
-    <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-xl">
-    <CardContent className="p-8 flex flex-col items-center">
-      <div className="w-full">
-      <div className="flex items-center justify-between mb-6">
-        <span className="text-purple-400 font-semibold text-lg">
-        Question {current + 1} <span className="text-gray-400">/ {quiz.length}</span>
-        </span>
-        <div className="flex-1 max-w-xs flex space-x-0.5 overflow-hidden rounded-full bg-gray-800 h-2">
-        {quiz.map((_, idx) => (
-          <span
-            key={idx}
-            className={`
-          transition-all duration-200
-          ${idx === current
-            ? "bg-purple-500"
-            : answers[idx]
-            ? "bg-purple-700/70"
-            : "bg-gray-700"}
-        `}
-            style={{
-              flex: 1,
-              minWidth: 4, // minimum width for visibility
-              borderRadius: idx === 0 ? "9999px 0 0 9999px" : idx === quiz.length - 1 ? "0 9999px 9999px 0" : "0",
-            }}
-          />
-        ))}
-        </div>
-      </div>
-      <div className="mb-8">
-        <h3 className="text-2xl font-bold text-white mb-4">{quiz[current].question}</h3>
-        <div className="grid gap-4">
-        {quiz[current].options.map((opt, idx) => (
-          <button
-          key={idx}
-          type="button"
-          onClick={() => handleOptionSelect(opt)}
-          className={`w-full flex items-center px-5 py-4 rounded-xl border-2 transition-all duration-150 text-lg font-medium
-            ${
-            answers[current] === opt
-              ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white shadow-lg scale-105"
-              : "bg-gray-900 border-gray-800 text-gray-300 hover:border-purple-400 hover:bg-gray-800"
-            }
-          `}
-          aria-pressed={answers[current] === opt}
-          >
-          <span className="mr-3 flex-shrink-0 h-6 w-6 rounded-full border-2 flex items-center justify-center
-            transition-all duration-150
-            "
-            style={{
-            borderColor:
-              answers[current] === opt
-              ? "#a78bfa"
-              : "#4b5563",
-            background:
-              answers[current] === opt
-              ? "linear-gradient(90deg,#a78bfa,#6366f1)"
-              : "transparent",
-            }}
-          >
-            {answers[current] === opt && (
-            <span className="block h-3 w-3 rounded-full bg-white" />
-            )}
-          </span>
-          <span className="flex-1 text-left">{opt}</span>
-          </button>
-        ))}
-        </div>
-      </div>
-      <div className="flex justify-between items-center w-full mt-4">
-        <Button
-        type="button"
-        variant="outline"
-        className="rounded-lg px-6 py-2 text-base font-semibold bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
-        onClick={handlePrev}
-        disabled={current === 0}
-        >
-        Previous
-        </Button>
-        {current < quiz.length - 1 ? (
-        <Button
-          type="button"
-          className="rounded-lg px-8 py-2 text-base font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-          onClick={handleNext}
-          disabled={!answers[current]}
-        >
-          Next
-        </Button>
-        ) : (
-        <Button
-          type="button"
-          className="rounded-lg px-8 py-2 text-base font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
-          onClick={handleFinalSubmit}
-          disabled={answers.some((a) => !a) || submitting}
-        >
-          {submitting ? (
-          <span>
-            <span className="animate-spin inline-block mr-2 align-middle">&#9696;</span>
-            Submitting...
-          </span>
-          ) : (
-          "Submit Quiz"
-          )}
-        </Button>
-        )}
-      </div>
-      </div>
-    </CardContent>
-    </Card>
-  </div>
+    <div className="mt-10 w-full max-w-xl flex flex-col items-center">
+      <Card className="w-full bg-gradient-to-br from-gray-900 via-gray-950 to-gray-900 border-2 border-purple-700/40 rounded-3xl shadow-xl">
+        <CardContent className="p-8 flex flex-col items-center">
+          <div className="w-full">
+            <div className="flex items-center justify-between mb-6">
+              <span className="text-purple-400 font-semibold text-lg">
+                Question {current + 1} <span className="text-gray-400">/ {quiz.length}</span>
+              </span>
+              <div className="flex-1 max-w-xs flex space-x-0.5 overflow-hidden rounded-full bg-gray-800 h-2">
+                {quiz.map((_, idx) => (
+                  <span
+                    key={idx}
+                    className={`
+                      transition-all duration-200
+                      ${idx === current
+                        ? "bg-purple-500"
+                        : answers[idx]
+                        ? "bg-purple-700/70"
+                        : "bg-gray-700"}
+                    `}
+                    style={{
+                      flex: 1,
+                      minWidth: 4, // minimum width for visibility
+                      borderRadius: idx === 0 ? "9999px 0 0 9999px" : idx === quiz.length - 1 ? "0 9999px 9999px 0" : "0",
+                    }}
+                  />
+                ))}
+              </div>
+            </div>
+            <div className="mb-8">
+              <h3 className="text-2xl font-bold text-white mb-4">{quiz[current].question}</h3>
+              <div className="grid gap-4">
+                {quiz[current].options.map((opt, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => handleOptionSelect(opt)}
+                    className={`w-full flex items-center px-5 py-4 rounded-xl border-2 transition-all duration-150 text-lg font-medium
+                      ${
+                        answers[current] === opt
+                          ? "bg-gradient-to-r from-purple-600 to-indigo-600 border-purple-500 text-white shadow-lg scale-105"
+                          : "bg-gray-900 border-gray-800 text-gray-300 hover:border-purple-400 hover:bg-gray-800"
+                      }
+                    `}
+                    aria-pressed={answers[current] === opt}
+                  >
+                    <span className="mr-3 flex-shrink-0 h-6 w-6 rounded-full border-2 flex items-center justify-center
+                      transition-all duration-150
+                      "
+                      style={{
+                        borderColor:
+                          answers[current] === opt
+                            ? "#a78bfa"
+                            : "#4b5563",
+                        background:
+                          answers[current] === opt
+                            ? "linear-gradient(90deg,#a78bfa,#6366f1)"
+                            : "transparent",
+                      }}
+                    >
+                      {answers[current] === opt && (
+                        <span className="block h-3 w-3 rounded-full bg-white" />
+                      )}
+                    </span>
+                    <span className="flex-1 text-left">{opt}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div className="flex justify-between items-center w-full mt-4">
+              <Button
+                type="button"
+                className="rounded-lg px-6 py-2 text-base font-semibold bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
+                onClick={handlePrev}
+                disabled={current === 0}
+              >
+                Previous
+              </Button>
+              {current < quiz.length - 1 ? (
+                <Button
+                  type="button"
+                  className="rounded-lg px-8 py-2 text-base font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  onClick={handleNext}
+                  disabled={!answers[current]}
+                >
+                  Next
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  className="rounded-lg px-8 py-2 text-base font-semibold bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700"
+                  onClick={handleFinalSubmit}
+                  disabled={answers.some((a) => !a) || submitting}
+                >
+                  {submitting ? (
+                    <span>
+                      <span className="animate-spin inline-block mr-2 align-middle">&#9696;</span>
+                      Submitting...
+                    </span>
+                  ) : (
+                    "Submit Quiz"
+                  )}
+                </Button>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 }
 
-// New ReviewStepper component for reviewing quiz results
+// ReviewStepper component for reviewing quiz results
 function ReviewStepper({
   quizResults,
   quiz,
@@ -629,7 +605,6 @@ function ReviewStepper({
             <div className="flex justify-between items-center w-full mt-4">
               <Button
                 type="button"
-                variant="outline"
                 className="rounded-lg px-6 py-2 text-base font-semibold bg-gray-800 border-gray-700 text-gray-300 hover:bg-gray-700"
                 onClick={() => setCurrent((c) => Math.max(0, c - 1))}
                 disabled={current === 0}
